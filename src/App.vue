@@ -43,6 +43,7 @@
 <p>{{msg}}</p>
 <p>Last move: {{direction}}</p>
 <p>Score: {{score}}</p>
+<p>Match exists: {{hasMatches}}</p>
 <div>
     <table>
       <tbody>
@@ -50,7 +51,7 @@
         <tr v-for="(row,y) in grid" :key="'col'+y">
           <!-- renders each cell for current column -->
           <td :class="classTileCell(cell,cell)" class="cell" :style="getColor(cell)" v-for="(cell,x) in row" :key="'row'+x">
-            <span class="cords">{{x}}:{{y}}</span>
+            <span class="cords" v-if="debug">{{x}}:{{y}}</span>
             <span class="value">{{cell}}</span>
           </td>
         </tr>
@@ -87,7 +88,7 @@ export default {
       debug: false,
       msg: "Welcome to Your Vue.js App",
       running: false,
-      // score: 0,
+      score: 0,
       grid: [
         [null, null, null, null],
         [null, null, null, null],
@@ -97,7 +98,8 @@ export default {
       clearX: 0,
       clearY: 0,
       direction: "none",
-      altPressed: false
+      altPressed: false,
+      gameOver: false
     };
   },
   created() {
@@ -137,17 +139,34 @@ export default {
   computed: {
     // gameOver() {},
     // isFull() {}
-    score() {
-      let score = 0;
+
+    hasMatches() {
       for (let y = 0; y < this.grid.length; y++) {
         for (let x = 0; x < this.grid[y].length; x++) {
-          if (Number.isInteger(this.grid[y][x])) {
-            score += this.grid[y][x];
+          if (
+            this.grid[y][x] === this.getNeighbour(x, y, "up") ||
+            this.grid[y][x] === this.getNeighbour(x, y, "right") ||
+            this.grid[y][x] === this.getNeighbour(x, y, "down") ||
+            this.grid[y][x] === this.getNeighbour(x, y, "left")
+          ) {
+            return true;
           }
         }
       }
-      return score;
+      return false;
     },
+    // score() {
+    //   // sums up all current scores
+    //   let score = 0;
+    //   for (let y = 0; y < this.grid.length; y++) {
+    //     for (let x = 0; x < this.grid[y].length; x++) {
+    //       if (Number.isInteger(this.grid[y][x])) {
+    //         score += this.grid[y][x];
+    //       }
+    //     }
+    //   }
+    //   return score;
+    // },
     freeTiles() {
       console.log("computing free tiles");
       let freeTiles = [];
@@ -165,6 +184,28 @@ export default {
     }
   },
   methods: {
+    getNeighbour(x, y, dir) {
+      switch (dir) {
+        case "up":
+          y--;
+          break;
+        case "right":
+          x++;
+          break;
+        case "down":
+          y++;
+          break;
+        case "left":
+          x--;
+          break;
+      }
+      // validate if cords are inside grid
+      if (x < 0 || x > 3 || y < 0 || y > 3) {
+        return undefined;
+      } else {
+        return this.grid[y][x];
+      }
+    },
     classTileCell: function(cell) {
       const isTile = Number.isInteger(cell);
       return {
@@ -184,7 +225,13 @@ export default {
       // 300 - 60 = 240
       // 240 / 11 = 21.82
       let hue = 60 + Math.log(value) / Math.log(2) * 21.81;
-      let color = `hsl(${hue}, 100%, 80%)`;
+
+      // 80 -> 50 (2-2048p)
+      const step = Math.log(value) / Math.log(2);
+      let sat = 80 - 3 * step;
+
+      let color = `hsl(${hue}, 100%, ${sat}%)`;
+      //  color = `hsl(60, 100%, 100%)`;
       return `background-color:${color};`;
     },
     touchHandler() {
@@ -211,6 +258,8 @@ export default {
       this.grid.push([null, null, null, null]);
       this.spawnTile();
       this.spawnTile();
+      this.score = 0;
+      this.gameOver = false;
       this.msg = "New game initiated";
     },
     getRandom(min, max) {
@@ -227,8 +276,9 @@ export default {
         let newTile = this.newTile();
         console.log("spawned new tile: " + newTile);
         this.updateGridCell(randomFreeTile.x, randomFreeTile.y, newTile);
-      } else {
+      } else if (!this.hasMatches) {
         this.msg = "Game over";
+        this.gameOver = true;
       }
     },
     updateGridCell(x, y, val) {
@@ -253,6 +303,7 @@ export default {
     //       break;
     //   }
     // },
+
     /** @augments dir direction of movement */
     move(dir) {
       console.log("key " + dir);
@@ -284,6 +335,7 @@ export default {
                 nextCell === currentCellContent
               ) {
                 console.log("merge to next cell");
+                this.score += currentCellContent + currentCellContent;
                 this.updateGridCell(
                   x,
                   y - 1,
@@ -297,33 +349,30 @@ export default {
         case "right":
           // right to left
           const length = this.grid.length;
-          for (let x = length - 1; x >= 0; x--) {
-            for (let y = length - 1; y >= 0; y--) {
+          for (let y = length - 1; y >= 0; y--) {
+            for (let x = length - 1; x >= 0; x--) {
               // has tile?
-              const currentCell = this.grid[x][y];
+              const currentCell = this.grid[y][x];
               const hasTile = Number.isInteger(currentCell);
-              for (let i = y - 1; i >= 0; i--) {
-                let incoming = this.grid[x][i];
+              for (let i = x - 1; i >= 0; i--) {
+                let incoming = this.grid[y][i];
                 if (isTile(incoming)) {
-                  // aka moving
-                  // let incoming = this.grid[x][i];
+                  // incoming/ moving
                   if (currentCell === incoming) {
                     // merge
-                    this.grid[x].splice(y, 1, currentCell + incoming);
-                    // this.grid[y].splice(x, 1, currentCell + incoming);
-                    // this.grid[x][y] = currentCell + incoming;
-                    this.grid[x].splice(i, 1, null);
-                    // this.grid[y][i] = null;
-                  } else if (currentCell === null) {
-                    // move incoming to current cell
-                    this.grid[x].splice(y, 1, incoming);
-                    // this.grid[y].splice(x, 1, incoming);
-                    // this.grid[x][y] = incoming;
-                    this.grid[x].splice(i, 1, null);
-                    // this.grid[y][i] = null;
+                    this.score += currentCell + incoming;
+                    this.grid[y].splice(x, 1, currentCell + incoming);
+                    this.grid[y].splice(i, 1, null);
                   }
-                  this.grid = this.grid;
-                  // this.grid[x].splice(y, 1, this.grid[x]);
+                  if (currentCell === null) {
+                    // move incoming to current cell
+                    this.grid[y].splice(x, 1, incoming);
+                    this.grid[y].splice(i, 1, null);
+
+                    // check if incoming cell has on self incoming with same value, if so merge before move
+                    for (let j = i - 1; j >= 0; j--) {}
+                    this.grid[y];
+                  }
                   break;
                 }
               }
@@ -335,28 +384,31 @@ export default {
           // for each column, from the top, check cell, if a tile, check if next can be merged, if not move to the next cell in the row
           for (let x = 0; x < l; x++) {
             // last cell does not need to checked for merge or movement
-            for (let y = 0; y + 1 < l; y++) {
-              console.log(`${x}:${y} ${this.grid[y][x]}`);
+            for (let y = 0; y < l - 1; y++) {
+              // console.log(`${x}:${y} ${this.grid[y][x]}`);
               const currentCellContent = this.grid[y][x];
-              const hasTile = Number.isInteger(currentCellContent);
-              const nextCell = this.grid[y + 1][x];
-              const nextCellIsEmpty = nextCell === null;
-
-              const nextCellHasTile = Number.isInteger(nextCell);
-              if (hasTile && nextCellIsEmpty) {
+              const currentCellHasTile = Number.isInteger(currentCellContent);
+              const currentCellIsEempty = currentCellContent === null;
+              // next cell in movement direction
+              const nextCellContent = this.grid[y + 1][x]; // below
+              const nextCellIsEmpty = nextCellContent === null;
+              const nextCellHasTile = Number.isInteger(nextCellContent);
+              if (currentCellHasTile && nextCellIsEmpty) {
                 console.log("move to next cell");
+                // add animation to current cell
                 this.updateGridCell(x, y + 1, currentCellContent);
                 this.clearGridCell(x, y);
               }
               if (
-                hasTile &&
+                currentCellHasTile &&
                 nextCellHasTile &&
-                nextCell === currentCellContent
+                nextCellContent === currentCellContent
               ) {
                 console.log("merge to next cell");
+                this.score += currentCellContent + currentCellContent;
                 this.updateGridCell(
                   x,
-                  y - 1,
+                  y + 1,
                   currentCellContent + currentCellContent
                 );
                 this.clearGridCell(x, y);
@@ -378,6 +430,7 @@ export default {
                   // let incoming = this.grid[x][i];
                   if (currentCell === incoming) {
                     // merge
+                    this.score += currentCell + incoming;
                     this.grid[x].splice(y, 1, currentCell + incoming);
                     // this.grid[y].splice(x, 1, currentCell + incoming);
                     // this.grid[x][y] = currentCell + incoming;
@@ -446,18 +499,18 @@ td {
 
 .cell {
   background: antiquewhite;
-  position: relative;
-  transition: all 200ms linear;
-  left: 0;
+  /* position: relative; */
+  /* transition: all 200ms linear; */
+  /* left: 0;
   top: 0;
   bottom: 0;
-  right: 0;
+  right: 0; */
 }
 
 .tile {
   background: yellow;
 }
-.cell.up {
+/* .cell.up {
   top: 44px;
   transition: all 300ms linear;
 }
@@ -472,7 +525,7 @@ td {
 .cell.left {
   right: 44px;
   transition: all 300ms linear;
-}
+} */
 
 .cords {
   font-size: 10px;
