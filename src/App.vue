@@ -552,4 +552,7 @@ td {
 .underline {
   text-decoration: underline;
 }
+body {
+  overflow-y: hidden;
+}
 </style>
