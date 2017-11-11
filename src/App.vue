@@ -37,13 +37,15 @@
 
 
 <p>{{msg}}</p>
+<p>Last move: {{direction}}</p>
+<p>Score: {{score}}</p>
 <div>
     <table>
       <tbody>
         <!-- renders one column -->
         <tr v-for="(row,y) in grid" :key="'col'+y">
           <!-- renders each cell for current column -->
-          <td :class="{tile:cell}" class="cell" v-for="(cell,x) in row" :key="'row'+x">
+          <td :class="classTileCell(cell,cell)" class="cell" v-for="(cell,x) in row" :key="'row'+x">
             <span class="cords">{{x}}:{{y}}</span>
             <span class="value">{{cell}}</span>
           </td>
@@ -81,7 +83,7 @@ export default {
       debug: false,
       msg: "Welcome to Your Vue.js App",
       running: false,
-      score: 0,
+      // score: 0,
       grid: [
         [null, null, null, null],
         [null, null, null, null],
@@ -89,19 +91,13 @@ export default {
         [null, null, null, null]
       ],
       clearX: 0,
-      clearY: 0
+      clearY: 0,
+      direction: "none"
     };
   },
   created() {
-    // this.msg = "requesting fullscreen"
-    // document.body.webkitRequestFullscreen()
-    // this.msg = "fullscreen applied"
-    // document.body.requestFullscreen();
     this.newGame();
-    // window.addEventListener("mousemove", console);
     document.onkeydown = event => {
-      // if (this.hasEmptyTile) {
-      // return;
       switch (event.keyCode) {
         case 37:
           this.move("left");
@@ -116,15 +112,23 @@ export default {
           this.move("down");
           break;
       }
-      // }
     };
   },
-  destroyed: function() {
-    // window.removeEventListener("mousemove", this.move);
-  },
+  destroyed: function() {},
   computed: {
     // gameOver() {},
     // isFull() {}
+    score() {
+      let score = 0;
+      for (let y = 0; y < this.grid.length; y++) {
+        for (let x = 0; x < this.grid[y].length; x++) {
+          if (Number.isInteger(this.grid[y][x])) {
+            score += this.grid[y][x];
+          }
+        }
+      }
+      return score;
+    },
     freeTiles() {
       console.log("computing free tiles");
       let freeTiles = [];
@@ -142,14 +146,23 @@ export default {
     }
   },
   methods: {
+    classTileCell: function(cell) {
+      // debugger
+      const isTile = Number.isInteger(cell);
+      return {
+        tile: isTile,
+        left: isTile && this.$data.direction === "left",
+        right: isTile && this.$data.direction === "right",
+        up: isTile && this.$data.direction === "up",
+        down: isTile && this.$data.direction === "down"
+      };
+    },
     touchHandler() {
       this.msg = "tapped";
     },
     swipeHandler(direction) {
       this.msg = "swyped " + direction; // May be left / right / top / bottom
       switch (direction) {
-        // case 'left':
-        //  case: 'right'
         case "top":
           this.move("up");
           break;
@@ -189,6 +202,12 @@ export default {
       }
     },
     updateGridCell(x, y, val) {
+      function validateCord(cord) {
+        if (cord < 0 || cord > 3) throw `error, cord ${cord} is out of bound")`;
+      }
+      validateCord(x);
+      validateCord(y);
+
       const oldVal = this.grid[y][x];
       this.$set(this.grid[y], x, val);
       console.log(`${x}:${y}, ${oldVal} => ${val}`);
@@ -196,11 +215,21 @@ export default {
     clearGridCell(x, y) {
       this.grid[y].splice(x, 1, null);
     },
+    // moveTile(x, y, dir) {
+    //   clearGridCell(x, y);
+    //   switch (dir) {
+    //     case "up":
+    //       updateGridCell(x, y, val);
+    //       break;
+    //   }
+    // },
     /** @augments dir direction of movement */
     move(dir) {
       console.log("key " + dir);
 
       const l = this.grid.length;
+
+      this.direction = dir;
 
       switch (dir) {
         case "up":
@@ -275,12 +304,14 @@ export default {
           // check tiles from top to bottom
           // for each column, from the top, check cell, if a tile, check if next can be merged, if not move to the next cell in the row
           for (let x = 0; x < l; x++) {
+            // last cell does not need to checked for merge or movement
             for (let y = 0; y + 1 < l; y++) {
               console.log(`${x}:${y} ${this.grid[y][x]}`);
               const currentCellContent = this.grid[y][x];
               const hasTile = Number.isInteger(currentCellContent);
               const nextCell = this.grid[y + 1][x];
               const nextCellIsEmpty = nextCell === null;
+
               const nextCellHasTile = Number.isInteger(nextCell);
               if (hasTile && nextCellIsEmpty) {
                 console.log("move to next cell");
@@ -363,8 +394,11 @@ body {
 table {
   margin: 0 auto;
 }
-.buttonWrapper {padding-top: 2em;}
-p, .center {
+.buttonWrapper {
+  padding-top: 2em;
+}
+p,
+.center {
   text-align: center;
 }
 td {
@@ -382,14 +416,32 @@ td {
 
 .cell {
   background: antiquewhite;
-  /* position: relative; */
+  position: relative;
   transition: all 200ms linear;
-  /* left: 0; */
+  left: 0;
+  top: 0;
+  bottom:0;
+  right: 0;
 }
 
 .tile {
   background: yellow;
-  /* left: 50px; */
+}
+.cell.up {
+  top: 44px;
+  transition: all 300ms linear;
+}
+.cell.down {
+  bottom: 44px;
+  transition: all 300ms linear;
+}
+.cell.right {
+  left: 44px;
+  transition: all 300ms linear;
+}
+.cell.left {
+  right: 44px;
+  transition: all 300ms linear;
 }
 
 .cords {
