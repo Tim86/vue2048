@@ -102,35 +102,20 @@ export default {
   },
   created() {
     this.newGame();
-    // document.addEventListener("keydown", function(event) {
-    //   console.log(event.which);
-    // })
-    // console.log('register key events')
     document.addEventListener("keydown", event => {
       if (event.keyCode === 17) {
-        // console.log("alt down");
         this.altPressed = true;
       }
-      // if (event.keyCode === 78) {
-      //   console.log("n pressed");
-      // }
       if (this.altPressed && event.keyCode === 78) {
         console.log("alt + n pressed");
         this.newGame();
       }
     });
     document.addEventListener("keyup", event => {
-      if (event.keyCode === 18) {
-        // console.log("alt up");
+      if (event.keyCode === 17) {
         this.altPressed = false;
       }
     });
-    // document.addEventListener('keypress', event => {
-    //   console.log("key press");
-    //   if (event.keyCode === 18) {
-    //     console.log("alt press");
-    //   }
-    // });
     document.addEventListener("keydown", event => {
       switch (event.keyCode) {
         case 37:
