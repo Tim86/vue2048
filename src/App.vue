@@ -28,7 +28,11 @@
       </ul>
       <p v-if="debug">Has empty tile: {{hasEmptyTile}}</p>
     <!-- <input type="button" value="add tile" @click="spawnTile"/> -->
-    <div class="buttonWrapper center"><input type="button" value="new game" @click="newGame"/></div>
+    <div class="buttonWrapper center">
+      <!-- <input type="button" value="new game" @click="newGame"/> -->
+      <button @click="newGame"><span :class="{underline:altPressed}">n</span>ew game</button>
+    </div>
+
     <p v-if="debug" id="clearPanel">
       X: <input type="number" v-model="clearX" min="0" max="3">
       Y: <input type="number" v-model="clearY" min="0" max="3">
@@ -92,12 +96,42 @@ export default {
       ],
       clearX: 0,
       clearY: 0,
-      direction: "none"
+      direction: "none",
+      altPressed: false
     };
   },
   created() {
     this.newGame();
-    document.onkeydown = event => {
+    // document.addEventListener("keydown", function(event) {
+    //   console.log(event.which);
+    // })
+    // console.log('register key events')
+    document.addEventListener("keydown", event => {
+      if (event.keyCode === 17) {
+        // console.log("alt down");
+        this.altPressed = true;
+      }
+      // if (event.keyCode === 78) {
+      //   console.log("n pressed");
+      // }
+      if (this.altPressed && event.keyCode === 78) {
+        console.log("alt + n pressed");
+        this.newGame();
+      }
+    });
+    document.addEventListener("keyup", event => {
+      if (event.keyCode === 18) {
+        // console.log("alt up");
+        this.altPressed = false;
+      }
+    });
+    // document.addEventListener('keypress', event => {
+    //   console.log("key press");
+    //   if (event.keyCode === 18) {
+    //     console.log("alt press");
+    //   }
+    // });
+    document.addEventListener("keydown", event => {
       switch (event.keyCode) {
         case 37:
           this.move("left");
@@ -112,7 +146,7 @@ export default {
           this.move("down");
           break;
       }
-    };
+    });
   },
   destroyed: function() {},
   computed: {
@@ -420,7 +454,7 @@ td {
   transition: all 200ms linear;
   left: 0;
   top: 0;
-  bottom:0;
+  bottom: 0;
   right: 0;
 }
 
@@ -465,5 +499,8 @@ td {
 #clearPanel input[type="number"] {
   padding-left: 0.8em;
   width: 2.8em;
+}
+.underline {
+  text-decoration: underline;
 }
 </style>
