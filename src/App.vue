@@ -49,7 +49,7 @@
         <!-- renders one column -->
         <tr v-for="(row,y) in grid" :key="'col'+y">
           <!-- renders each cell for current column -->
-          <td :class="classTileCell(cell,cell)" class="cell" v-for="(cell,x) in row" :key="'row'+x">
+          <td :class="classTileCell(cell,cell)" class="cell" :style="getColor(cell)" v-for="(cell,x) in row" :key="'row'+x">
             <span class="cords">{{x}}:{{y}}</span>
             <span class="value">{{cell}}</span>
           </td>
@@ -166,7 +166,6 @@ export default {
   },
   methods: {
     classTileCell: function(cell) {
-      // debugger
       const isTile = Number.isInteger(cell);
       return {
         tile: isTile,
@@ -175,6 +174,18 @@ export default {
         up: isTile && this.$data.direction === "up",
         down: isTile && this.$data.direction === "down"
       };
+    },
+    getColor(value) {
+      if (value === null) {
+        return "";
+      }
+      // let color;
+      // Hue from 300 (2p) - 60 (2048p)
+      // 300 - 60 = 240
+      // 240 / 11 = 21.82
+      let hue = 60 + Math.log(value) / Math.log(2) * 21.81;
+      let color = `hsl(${hue}, 100%, 80%)`;
+      return `background-color:${color};`;
     },
     touchHandler() {
       this.msg = "tapped";
