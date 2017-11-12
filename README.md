@@ -2,7 +2,7 @@
 
 > Playing with vue while making a simple game.
 
-Based on the vue-cli simple webpack boilerplate. The currently latest playable version can be tested on [2048.scharinger.se](2048.scharinger.se). Development is not complete.
+Based on the vue-cli simple webpack boilerplate. The currently latest playable version can be tested on [2048.scharinger.se](http://2048.scharinger.se). Development is not complete.
 
 ### Features
 
