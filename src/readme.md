@@ -10,13 +10,13 @@ A tile can only merge once per turn.
 On a player move. Do the following. 
 
 On move ***up** (e.g.)*
-1. Start from the ***top***.
-2. Don't touch the first cells tile. Store if it is empty or not.
-3. Move to next tile.
-4. Find incoming tile. That may stop before this, merge into or take its place.
-5. Check incoming tiles value and compare to current. If they can merge, do so. 
-6. If privous cell was empty, move current tile there.
-7. Go back to step *3. Move next tile*
+1. Start from the ***top*** cell.
+1. Check if cell has a tile. If empty, store that fact and move to next cell.
+1. **Find** incoming **tile** *It may stop before current cell, merge into or take its place.* If there is no incoming tile. ~~Continue to next cell.~~
+1. Check if incoming tile has equal value. If so merge with curren tile.
+1. ~~If current cell is empty, move incoming tile here.~~
+1. If previous cell was empty, move current tile there. Store that current cell is empty.
+1. Go back to step **2.**
 
 ### Test cases
 ``` javascript
