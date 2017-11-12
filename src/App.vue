@@ -40,23 +40,23 @@
     </p>
 
 
-<p>{{msg}}</p>
-<p>Last move: {{direction}}</p>
+<p v-if="debug">Last move: {{direction}}</p>
 <p>Score: {{score}}</p>
-<p>Match exists: {{hasMatches}}</p>
-<div>
-    <table>
-      <tbody>
-        <!-- renders one column -->
-        <tr v-for="(row,y) in grid" :key="'col'+y">
-          <!-- renders each cell for current column -->
-          <td :class="classTileCell(cell,cell)" class="cell" :style="getColor(cell)" v-for="(cell,x) in row" :key="'row'+x">
-            <span class="cords" v-if="debug">{{x}}:{{y}}</span>
-            <span class="value">{{cell}}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<p v-if="debug">Match exists: {{hasMatches}}</p>
+<p id="msg" :class="{gameOver}">{{msg}}</p>
+<div id="board" :class="{gameOver}">
+  <table>
+    <tbody>
+      <!-- renders one column -->
+      <tr v-for="(row,y) in grid" :key="'col'+y">
+        <!-- renders each cell for current column -->
+        <td :class="classTileCell(cell,cell)" class="cell" :style="getColor(cell)" v-for="(cell,x) in row" :key="'row'+x">
+          <span class="cords" v-if="debug">{{x}}:{{y}}</span>
+          <span class="value">{{cell}}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
     <div v-if="debug" id="buttonPanel">
       <input type="button" class="u" value="up" @click="move('up')"/>
@@ -155,18 +155,6 @@ export default {
       }
       return false;
     },
-    // score() {
-    //   // sums up all current scores
-    //   let score = 0;
-    //   for (let y = 0; y < this.grid.length; y++) {
-    //     for (let x = 0; x < this.grid[y].length; x++) {
-    //       if (Number.isInteger(this.grid[y][x])) {
-    //         score += this.grid[y][x];
-    //       }
-    //     }
-    //   }
-    //   return score;
-    // },
     freeTiles() {
       console.log("computing free tiles");
       let freeTiles = [];
@@ -524,5 +512,24 @@ td {
 }
 body {
   overflow-y: hidden;
+}
+#msg.gameOver {
+  position: relative;
+  top: 105px;
+  z-index: 10;
+  color: pink;
+  font-size: 2.4em;
+  margin: 0;
+  text-shadow: black 2px 2px;
+  font-weight: bold;
+  font-family: monospace;
+  transition: all 400ms;
+}
+#board {
+  /* margin: 4px; */
+}
+#board.gameOver {
+  transition: all 400ms;
+  filter: blur(2px);
 }
 </style>
