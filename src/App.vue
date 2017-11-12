@@ -513,7 +513,11 @@ td {
 body {
   overflow-y: hidden;
 }
+#msg{
+  visibility: hidden;
+}
 #msg.gameOver {
+  visibility: visible;
   position: relative;
   top: 105px;
   z-index: 10;
@@ -523,7 +527,7 @@ body {
   text-shadow: black 2px 2px;
   font-weight: bold;
   font-family: monospace;
-  transition: all 400ms;
+  transition: all 400ms ease-in-out;
 }
 #board {
   /* margin: 4px; */
