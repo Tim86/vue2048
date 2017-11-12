@@ -295,14 +295,6 @@ export default {
     clearGridCell(x, y) {
       this.grid[y].splice(x, 1, null);
     },
-    // moveTile(x, y, dir) {
-    //   clearGridCell(x, y);
-    //   switch (dir) {
-    //     case "up":
-    //       updateGridCell(x, y, val);
-    //       break;
-    //   }
-    // },
 
     /** @augments dir direction of movement */
     move(dir) {
@@ -499,33 +491,11 @@ td {
 
 .cell {
   background: antiquewhite;
-  /* position: relative; */
-  /* transition: all 200ms linear; */
-  /* left: 0;
-  top: 0;
-  bottom: 0;
-  right: 0; */
 }
 
 .tile {
   background: yellow;
 }
-/* .cell.up {
-  top: 44px;
-  transition: all 300ms linear;
-}
-.cell.down {
-  bottom: 44px;
-  transition: all 300ms linear;
-}
-.cell.right {
-  left: 44px;
-  transition: all 300ms linear;
-}
-.cell.left {
-  right: 44px;
-  transition: all 300ms linear;
-} */
 
 .cords {
   font-size: 10px;

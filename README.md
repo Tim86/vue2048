@@ -10,6 +10,12 @@ Based on the vue-cli simple webpack boilerplate.
 https://github.com/vuejs/vue-touch
 
 ## TODO
+
+Begin partly from start with the **tile approach** which keeps track of all tiles in a simple array, where each track has cords and value. The old **grid approach** makes it hard to make the game behave like the original.
+
+```javascript
+tiles = [{x:0,y:0,v:2},{x:1,y:0,v:2} ... ]
+```
 1. Use vue watchers to make transition effects on value changes.
 1. Keep track of swype movements, keep in state.
     1. Use that info to add slide effects on tiles that are "updated". 
