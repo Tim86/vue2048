@@ -4,6 +4,7 @@
 
 Based on the vue-cli simple webpack boilerplate.
 
+
 ## Dependencies
 
 https://github.com/vuejs/vue-touch
@@ -14,6 +15,8 @@ https://github.com/vuejs/vue-touch
     1. Use that info to add slide effects on tiles that are "updated". 
     1. Change slide method names to be more logical, true to real life.
 1. Finish the movement function, each dir is diffrent, use the best. 
+
+[Game rules](./src/readme.md) needed to be implemented better.
 
 ## Caveats
 
